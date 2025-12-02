@@ -4,6 +4,6 @@
 
 int main()
 {
-    int answer = day_1_1();
+    int answer = day_1_2();
     std::cout << answer << std::endl;
 }
