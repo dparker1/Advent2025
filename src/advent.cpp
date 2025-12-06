@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <math.h>
+#include <vector>
 
 #include "advent.h"
 
@@ -35,7 +36,7 @@ int64_t day_1_1()
             final_count++;
         }
     }
-
+    ifile.close();
     return final_count;
 }
 
@@ -75,6 +76,7 @@ int64_t day_1_2()
             final_count++;
         }
     }
+    ifile.close();
     return final_count;
 }
 
@@ -135,6 +137,7 @@ int64_t day_2_1()
     int64_t sum = 0;
     std::string content;
     std::getline(ifile, content);
+    ifile.close();
     size_t comma_pos = -1;
     size_t dash_pos, begi, endi;
     while((comma_pos = content.find(",")) != std::string::npos)
@@ -161,6 +164,7 @@ int64_t day_2_2()
     int64_t sum = 0;
     std::string content;
     std::getline(ifile, content);
+    ifile.close();
     size_t comma_pos = -1;
     size_t dash_pos, begi, endi;
     while ((comma_pos = content.find(",")) != std::string::npos)
@@ -215,6 +219,7 @@ int64_t day_3_1()
         curr_val += max_num;
         sum += curr_val;
     }
+    ifile.close();
 
     return sum;
 }
@@ -252,6 +257,52 @@ int64_t day_3_2()
         }
         sum += curr_val;
     }
+    ifile.close();
 
     return sum;
+}
+
+int64_t day_4_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_4_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::string> chars;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        chars.push_back(content);
+    }
+    ifile.close();
+
+    int size = chars.size();
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            int s = 0;
+            int ilow = std::max<int>(0, i - 1);
+            int ihigh = std::min<int>(size - 1, i + 1);
+            int jlow = std::max<int>(0, j - 1);
+            int jhigh = std::min<int>(size - 1, j + 1);
+            for (int ii = ilow; ii <= ihigh; ii++)
+            {
+                for (int jj = jlow; jj <= jhigh; jj++)
+                {
+                    if ((ii == i) && (jj == j))
+                    {
+                        continue;
+                    }
+                    s += chars[ii][jj] == '@';
+                }
+            }
+            if (chars[i][j] == '@')
+            {
+                count += s < 4;
+            }
+        }
+    }
+    return count;
 }
