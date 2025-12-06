@@ -182,7 +182,7 @@ int64_t day_2_2()
 int64_t day_3_1()
 {
     std::ifstream ifile;
-    ifile.open("./data/input_3_1.txt");
+    ifile.open("./data/test.txt");
 
     int64_t sum = 0;
     std::string content;
@@ -213,6 +213,43 @@ int64_t day_3_1()
             }
         }
         curr_val += max_num;
+        sum += curr_val;
+    }
+
+    return sum;
+}
+
+int64_t day_3_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_3_1.txt");
+
+    int64_t sum = 0;
+    int digits = 12;
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        size_t content_len = content.length();
+        int max_num = 0;
+        int max_num_i = 0;
+        int last_max_num_i = -1;
+        int64_t curr_val = 0;
+        int x = 0;
+        for (int d = 0; d < digits; d++)
+        {
+            for (size_t i = last_max_num_i + 1; i < content_len - digits + d + 1; i++)
+            {
+                x = content[i] - 48;
+                if (x > max_num)
+                {
+                    max_num = x;
+                    max_num_i = i;
+                }
+            }
+            curr_val = 10 * curr_val + max_num;
+            max_num = 0;
+            last_max_num_i = max_num_i;
+        }
         sum += curr_val;
     }
 
