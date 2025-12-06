@@ -5,13 +5,13 @@
 
 #include "advent.h"
 
-int day_1_1()
+int64_t day_1_1()
 {
     std::ifstream ifile;
     ifile.open("./data/input_1_1.txt");
     
     int pos = 50;
-    int final_count = 0;
+    int64_t final_count = 0;
     std::string content;
     while(std::getline(ifile, content))
     {
@@ -39,13 +39,13 @@ int day_1_1()
     return final_count;
 }
 
-int day_1_2()
+int64_t day_1_2()
 {
     std::ifstream ifile;
     ifile.open("./data/input_1_1.txt");
     
     int pos = 50;
-    int final_count = 0;
+    int64_t final_count = 0;
     std::string content;
     while(std::getline(ifile, content))
     {
@@ -175,6 +175,46 @@ int64_t day_2_2()
     begi = std::stoll(content.substr(0, dash_pos));
     endi = std::stoll(content.substr(dash_pos + 1, comma_pos));
     sum += check_numbers_2_2(begi, endi);
+
+    return sum;
+}
+
+int64_t day_3_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_3_1.txt");
+
+    int64_t sum = 0;
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        
+        size_t content_len = content.length();
+        int max_num = 0;
+        int max_num_i = 0;
+        int x = 0;
+        for (size_t i = 0; i < content_len - 1; i++)
+        {
+            x = content[i] - 48;
+            if (x > max_num)
+            {
+                max_num = x;
+                max_num_i = i;
+            }
+        }
+        int curr_val = 10 * max_num;
+        max_num = 0;
+        for (size_t i = max_num_i + 1; i < content_len; i++)
+        {
+            x = content[i] - 48;
+            if (x > max_num)
+            {
+                max_num = x;
+            }
+        }
+        curr_val += max_num;
+        sum += curr_val;
+    }
 
     return sum;
 }
