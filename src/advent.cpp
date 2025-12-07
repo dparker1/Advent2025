@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <math.h>
 #include <vector>
@@ -462,4 +463,72 @@ int64_t day_5_2()
     count += curr_upper - curr_lower + 1;
     
     return count;
+}
+
+int64_t add(int64_t x, int64_t y)
+{
+    return x + y;
+}
+
+int64_t mult(int64_t x, int64_t y)
+{
+    return x * y;
+}
+
+int64_t day_6_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_6_1.txt");
+
+    int64_t sum = 0;
+    std::vector<std::string> rows;
+    std::vector<std::vector<std::int64_t>> numeric_rows;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        rows.push_back(content);
+    }
+    ifile.close();
+
+    size_t i;
+    for(i = 0; i < rows.size() - 1; i++)
+    {
+        std::vector<int64_t> numeric_row;
+        std::istringstream content_stream(rows[i]);
+        std::string tok;
+        while (content_stream >> tok)
+        {
+            numeric_row.push_back(std::stoll(tok));
+        }
+        numeric_rows.push_back(numeric_row);
+    }
+
+    std::istringstream content_stream(rows.back());
+    std::string tok;
+    size_t j = 0;
+    while (content_stream >> tok)
+    {
+        int64_t(*agg_func)(int64_t, int64_t);
+        int64_t val;
+        if (tok.at(0) == '*')
+        {
+            agg_func = mult;
+            val = 1;
+        }
+        else
+        {
+            agg_func = add;
+            val = 0;
+        }
+        
+        for (i = 0; i < numeric_rows.size(); i++)
+        {
+            val = agg_func(val, numeric_rows[i][j]);
+        }
+        j++;
+        sum += val;
+    }
+
+    return sum;
 }
