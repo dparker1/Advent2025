@@ -277,10 +277,10 @@ int64_t day_4_1()
     }
     ifile.close();
 
-    int size = chars.size();
-    for (int i = 0; i < size; i++)
+    size_t size = chars.size();
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (size_t j = 0; j < size; j++)
         {
             int s = 0;
             int ilow = std::max<int>(0, i - 1);
@@ -304,5 +304,73 @@ int64_t day_4_1()
             }
         }
     }
+    return count;
+}
+
+int64_t day_4_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_4_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::vector<int>> indicators;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        std::vector<int> ind;
+        for(std::string::iterator it = content.begin(); it != content.end(); it++)
+        {
+            ind.push_back(*it == '@'); // Dereference iterator to access character
+        }
+        indicators.push_back(ind);
+    }
+    ifile.close();
+
+    size_t size = indicators.size();
+    bool has_remain = true;
+    while (has_remain)
+    {
+        has_remain = false;
+        for (size_t i = 0; i < size; i++)
+        {
+            for (size_t j = 0; j < size; j++)
+            {
+                if (indicators[i][j] == -1)
+                {
+                    count++;
+                    indicators[i][j] = 0;
+                }
+            }
+        }
+        for (size_t i = 0; i < size; i++)
+        {
+            for (size_t j = 0; j < size; j++)
+            {
+                int s = 0;
+                int ilow = std::max<int>(0, i - 1);
+                int ihigh = std::min<int>(size - 1, i + 1);
+                int jlow = std::max<int>(0, j - 1);
+                int jhigh = std::min<int>(size - 1, j + 1);
+                for (int ii = ilow; ii <= ihigh; ii++)
+                {
+                    for (int jj = jlow; jj <= jhigh; jj++)
+                    {
+                        if ((ii == i) && (jj == j))
+                        {
+                            continue;
+                        }
+                        s += indicators[ii][jj] != 0;
+                    }
+                }
+                if ((indicators[i][j] != 0) && (s < 4))
+                {
+                    indicators[i][j] = -1;
+                    has_remain = true;
+                }
+            }
+        }
+    }
+    
     return count;
 }
