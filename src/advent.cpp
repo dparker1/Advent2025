@@ -374,3 +374,43 @@ int64_t day_4_2()
     
     return count;
 }
+
+int64_t day_5_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_5_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::vector<int64_t>> ranges;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        size_t dash_pos = content.find('-');
+        if (dash_pos != std::string::npos)
+        {
+            std::vector<int64_t> range;
+            range.push_back(std::stoll(content.substr(0, dash_pos)));
+            content.erase(0, dash_pos+1);
+            range.push_back(std::stoll(content));
+            ranges.push_back(range);
+        }
+        else
+        {
+            if (content.size() > 0)
+            {
+                int64_t val = std::stoll(content);
+                for (std::vector<int64_t>& v : ranges)
+                {
+                    if ((val >= v[0]) && (val <= v[1]))
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    ifile.close();
+    return count;
+}
