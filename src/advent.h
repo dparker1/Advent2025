@@ -7,3 +7,4 @@ int64_t day_3_2();
 int64_t day_4_1();
 int64_t day_4_2();
 int64_t day_5_1();
+int64_t day_5_2();

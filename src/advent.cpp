@@ -3,6 +3,7 @@
 #include <string>
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 #include "advent.h"
 
@@ -56,7 +57,7 @@ int64_t day_1_2()
         {
             diff *= -1;
         }
-        if((pos == 0) & (diff < 0))
+        if((pos == 0) && (diff < 0))
         {
             final_count--;
         }
@@ -71,7 +72,7 @@ int64_t day_1_2()
             final_count++;
             pos -= 100;
         }
-        if((pos == 0) & (diff < 0))
+        if((pos == 0) && (diff < 0))
         {
             final_count++;
         }
@@ -195,7 +196,7 @@ int64_t day_3_1()
         
         size_t content_len = content.length();
         int max_num = 0;
-        int max_num_i = 0;
+        size_t max_num_i = 0;
         int x = 0;
         for (size_t i = 0; i < content_len - 1; i++)
         {
@@ -412,5 +413,53 @@ int64_t day_5_1()
         }
     }
     ifile.close();
+    return count;
+}
+
+int64_t day_5_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_5_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::vector<int64_t>> ranges;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        size_t dash_pos = content.find('-');
+        if (dash_pos != std::string::npos)
+        {
+            std::vector<int64_t> range;
+            range.push_back(std::stoll(content.substr(0, dash_pos)));
+            content.erase(0, dash_pos + 1);
+            range.push_back(std::stoll(content));
+            ranges.push_back(range);
+        }
+    }
+    ifile.close();
+
+    std::sort(ranges.begin(), ranges.end(), [](std::vector<int64_t> a, std::vector<int64_t> b)
+    {
+        return a[0] < b[0];
+    });
+
+    int64_t curr_lower = ranges[0][0];
+    int64_t curr_upper = ranges[0][1];
+    for (size_t i = 1; i < ranges.size(); i++)
+    {
+        if (curr_upper >= ranges[i][0])
+        {
+            curr_upper = std::max<int64_t>(ranges[i][1], curr_upper);
+        }
+        else
+        {
+            count += curr_upper - curr_lower + 1;
+            curr_lower = ranges[i][0];
+            curr_upper = ranges[i][1];
+        }
+    }
+    count += curr_upper - curr_lower + 1;
+    
     return count;
 }
