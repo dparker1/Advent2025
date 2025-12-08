@@ -847,3 +847,70 @@ int64_t day_8_1()
 
     return product;
 }
+
+int64_t day_8_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_8_1.txt");
+
+    std::vector<Vec3> vectors;
+    std::vector<size_t> positions;
+    std::priority_queue<CompVec, std::vector<CompVec>, MinHeapComparator> comparisons;
+
+    std::string content;
+    size_t pos = 0;
+    while (std::getline(ifile, content))
+    {
+        Vec3 v;
+
+        size_t comma_pos = content.find(',');
+        v.x = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        comma_pos = content.find(',');
+        v.y = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        v.z = std::stoll(content);
+
+        positions.push_back(pos++);
+        vectors.push_back(v);
+    }
+    ifile.close();
+
+    for (size_t i = 0; i < vectors.size() - 1; i++)
+    {
+        for (size_t j = i + 1; j < vectors.size(); j++)
+        {
+            long double dist = vector_dist(vectors[i], vectors[j]);
+            comparisons.push({ {(int64_t)i, (int64_t)j},  dist });
+        }
+    }
+
+    bool all_same = false;
+    int64_t product = 0;
+    while (!all_same)
+    {
+        Vec2 curr = comparisons.top().v;
+        int64_t xpos = positions[curr.x];
+        int64_t ypos = positions[curr.y];
+        product = vectors[curr.x].x * vectors[curr.y].x;
+        if (xpos != ypos)
+        {
+            for (size_t i = 0; i < positions.size(); i++)
+            {
+                if (positions[i] == ypos)
+                {
+                    positions[i] = xpos;
+                }
+            }
+        }
+        int64_t p = positions[0];
+        all_same = true;
+        for (size_t i = 1; i < positions.size(); i++)
+        {
+            all_same &= positions[i] == p;
+        }
+        comparisons.pop();
+    }
+
+    return product;
+}
