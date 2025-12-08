@@ -4,7 +4,9 @@
 #include <string>
 #include <math.h>
 #include <vector>
+#include <queue>
 #include <algorithm>
+#include <unordered_map>
 
 #include "advent.h"
 
@@ -735,4 +737,113 @@ int64_t day_7_2()
         count += v;
     }
     return count;
+}
+
+struct Vec3 
+{
+    int64_t x, y, z;
+};
+
+struct Vec2
+{
+    int64_t x, y;
+};
+
+struct CompVec
+{
+    Vec2 v;
+    long double dist;
+};
+
+struct MinHeapComparator {
+    bool operator()(CompVec a, CompVec b) {
+        return a.dist > b.dist;
+    }
+};
+
+long double vector_dist(Vec3 v1, Vec3 v2)
+{
+    return std::sqrt(std::pow(v1.x - v2.x, 2) + std::pow(v1.y - v2.y, 2) + std::pow(v1.z - v2.z, 2));
+}
+
+int64_t day_8_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_8_1.txt");
+
+    uint16_t n_connections = 1000;
+
+    std::vector<Vec3> vectors;
+    std::vector<size_t> positions;
+    std::priority_queue<CompVec, std::vector<CompVec>, MinHeapComparator> comparisons;
+
+    std::string content;
+    size_t pos = 0;
+    while (std::getline(ifile, content))
+    {
+        Vec3 v;
+
+        size_t comma_pos = content.find(',');
+        v.x = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        comma_pos = content.find(',');
+        v.y = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        v.z = std::stoll(content);
+
+        positions.push_back(pos++);
+        vectors.push_back(v);
+    }
+    ifile.close();
+
+    for (size_t i = 0; i < vectors.size() - 1; i++)
+    {
+        for (size_t j = i + 1; j < vectors.size(); j++)
+        {
+            long double dist = vector_dist(vectors[i], vectors[j]);
+            comparisons.push({ {(int64_t)i, (int64_t)j},  dist });
+        }
+    }
+
+    size_t conns = 0;
+    while(conns++ < n_connections)
+    {
+        Vec2 curr = comparisons.top().v;
+        int64_t xpos = positions[curr.x];
+        int64_t ypos = positions[curr.y];
+        if (xpos != ypos)
+        {
+            for (size_t i = 0; i < positions.size(); i++)
+            {
+                if (positions[i] == ypos)
+                {
+                    positions[i] = xpos;
+                }
+            }
+        }
+        comparisons.pop();
+    }
+
+    std::unordered_map<uint64_t, size_t> counts;
+    for (uint64_t v : positions)
+        ++counts[v];
+
+    int64_t product = 1;
+    for (size_t i = 0; i < 3; i++)
+    {
+        int64_t max_count = 0;
+        size_t max_j = 0;
+        for (size_t j = 0; j < vectors.size(); j++)
+        {
+            if (counts[j] > max_count)
+            {
+                max_count = counts[j];
+                max_j = j;
+            }
+        }
+        counts.erase(max_j);
+        product *= max_count;
+    }
+
+    return product;
 }
