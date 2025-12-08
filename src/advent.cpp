@@ -532,3 +532,85 @@ int64_t day_6_1()
 
     return sum;
 }
+
+int64_t day_6_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_6_1.txt");
+
+    int64_t sum = 0;
+    std::vector<std::string> rows;
+    std::vector<std::string> numeric_rows;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        rows.push_back(content);
+    }
+    ifile.close();
+
+    for (size_t i = 0; i < rows.size() - 1; i++)
+    {
+        numeric_rows.push_back(rows[i]);
+    }
+
+    std::vector<std::string> pivoted_rows;
+    for (size_t i = 0; i < numeric_rows[0].size(); i++)
+    {
+        std::string r;
+        for (size_t j = 0; j < numeric_rows.size(); j++)
+        {
+            r.push_back(rows[j][i]);
+        }   
+        pivoted_rows.push_back(r);
+    }
+
+    std::istringstream content_stream(rows.back());
+    char tok;
+    std::vector<char> ops;
+    size_t j = 0;
+    while (content_stream >> tok)
+    {
+        ops.push_back(tok);
+    }
+
+    int64_t(*agg_func)(int64_t, int64_t);
+    int64_t agg_val;
+    j = 0;
+    if (ops[j] == '*')
+    {
+        agg_val = 1;
+        agg_func = mult;
+    }
+    else
+    {
+        agg_val = 0;
+        agg_func = add;
+    }
+    for (size_t i = 0; i < pivoted_rows.size(); i++)
+    {
+        if (pivoted_rows[i].find_first_not_of(' ') != std::string::npos)
+        {
+            int64_t val = std::stoll(pivoted_rows[i]);
+            agg_val = agg_func(agg_val, val);
+        }
+        else
+        {
+            sum += agg_val;
+            j++;
+            if (ops[j] == '*')
+            {
+                agg_val = 1;
+                agg_func = mult;
+            }
+            else
+            {
+                agg_val = 0;
+                agg_func = add;
+            }
+        }
+    }
+    sum += agg_val;
+
+    return sum;
+}
