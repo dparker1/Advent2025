@@ -614,3 +614,52 @@ int64_t day_6_2()
 
     return sum;
 }
+
+int64_t day_7_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_7_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::string> rows;
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        rows.push_back(content);
+    }
+    ifile.close();
+
+    size_t i, j;
+    for (i = 1; i < rows.size(); i++)
+    {
+        for (j = 0; j < rows[i].size(); j++)
+        {
+            switch (rows[i][j])
+            {
+            case '.':
+                if ((rows[i - 1][j] == '|') || (rows[i - 1][j] == 'S'))
+                {
+                    rows[i][j] = '|';
+                }
+                break;
+            case '^':
+                if (rows[i - 1][j] == '|')
+                {
+                    count++;
+                    if ((j < rows[i].size() - 1) && (rows[i][j + 1] != '^'))
+                    {
+                        rows[i][j + 1] = '|';
+                    }
+                    if ((j > 0) && (rows[i][j - 1] != '^'))
+                    {
+                        rows[i][j - 1] = '|';
+                    }
+                }
+                
+            }
+            
+        }
+    }
+
+    return count;
+}
