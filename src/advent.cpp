@@ -663,3 +663,76 @@ int64_t day_7_1()
 
     return count;
 }
+
+int64_t day_7_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_7_1.txt");
+
+    int64_t count = 0;
+    std::vector<std::string> rows;
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        rows.push_back(content);
+    }
+    ifile.close();
+
+    size_t i, j;
+    std::vector<uint64_t> curr_path_counts;
+    std::vector<std::vector<uint64_t>> path_counts;
+    for (j = 0; j < rows[0].size(); j++)
+    {
+        uint64_t count = rows[0][j] == 'S';
+        curr_path_counts.push_back(count);
+    }
+    path_counts.push_back(curr_path_counts);
+
+    for (i = 1; i < rows.size(); i++)
+    {
+        for (j = 0; j < rows[i].size(); j++)
+        {
+            curr_path_counts[j] = 0;
+        }
+        std::vector<uint64_t> prev_path_counts = path_counts.back();
+        for (j = 0; j < rows[i].size(); j++)
+        {
+            switch (rows[i][j])
+            {
+            case '.':
+                if ((rows[i - 1][j] == '|') || (rows[i - 1][j] == 'S'))
+                {
+                    rows[i][j] = '|';
+                    curr_path_counts[j] += prev_path_counts[j];
+                }
+                break;
+            case '|':
+                if ((rows[i - 1][j] == '|') || (rows[i - 1][j] == 'S'))
+                {
+                    curr_path_counts[j] += prev_path_counts[j];
+                }
+                break;
+            case '^':
+                if (rows[i - 1][j] == '|')
+                {
+                    if (j < rows[i].size() - 1)
+                    {
+                        rows[i][j + 1] = '|';
+                        curr_path_counts[j + 1] += prev_path_counts[j];
+                    }
+                    if (j > 0)
+                    {
+                        rows[i][j - 1] = '|';
+                        curr_path_counts[j - 1] += prev_path_counts[j];
+                    }
+                }
+            }
+        }
+        path_counts.push_back(curr_path_counts);
+    }
+    for(uint64_t v : curr_path_counts)
+    {
+        count += v;
+    }
+    return count;
+}
