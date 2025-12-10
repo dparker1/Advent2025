@@ -914,3 +914,39 @@ int64_t day_8_2()
 
     return product;
 }
+
+int64_t day_9_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_9_1.txt");
+
+    std::vector<Vec2> vectors;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        Vec2 v;
+
+        size_t comma_pos = content.find(',');
+        v.x = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        comma_pos = content.find(',');
+        v.y = std::stoll(content.substr(0, comma_pos));
+
+        vectors.push_back(v);
+    }
+    ifile.close();
+
+    int64_t area = 0;
+    int64_t max_area = 0;
+    for (size_t i = 0; i < vectors.size() - 1; i++)
+    {
+        for (size_t j = i + 1; j < vectors.size(); j++)
+        {
+            area = std::abs((vectors[i].x - vectors[j].x + 1) * (vectors[i].y - vectors[j].y + 1));
+            max_area = std::max(max_area, area);
+        }
+    }
+
+    return max_area;
+}
