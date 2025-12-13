@@ -950,3 +950,129 @@ int64_t day_9_1()
 
     return max_area;
 }
+
+bool line_intersect(std::vector<Vec2> line1, std::vector<Vec2> line2)
+{
+    int64_t d1 = (line1[1].x - line1[0].x) * (line2[0].y - line1[0].y) - (line1[1].y - line1[0].y) * (line2[0].x - line1[0].x);
+    int64_t d2 = (line1[1].x - line1[0].x) * (line2[1].y - line1[0].y) - (line1[1].y - line1[0].y) * (line2[1].x - line1[0].x);
+    int64_t d3 = (line2[1].x - line2[0].x) * (line1[0].y - line2[0].y) - (line2[1].y - line2[0].y) * (line1[0].x - line2[0].x);
+    int64_t d4 = (line2[1].x - line2[0].x) * (line1[1].y - line2[0].y) - (line2[1].y - line2[0].y) * (line1[1].x - line2[0].x);
+    return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+}
+
+bool is_inside(Vec2 p, std::vector<Vec2> vectors)
+{
+    bool inside = false;
+    int64_t n = vectors.size();
+    for (size_t ii = 0; ii < n; ii++)
+    {
+        size_t jj = (ii + n - 1) % n;
+        if ((vectors[ii].y > p.y) != (vectors[jj].y > p.y))
+        {
+            int64_t x_int = (vectors[jj].x - vectors[ii].x) * (p.y - vectors[ii].y) / (vectors[jj].y - vectors[ii].y) + vectors[ii].x;
+            if (p.x < x_int)
+            {
+                inside = !inside;
+            }
+        }
+    }
+    return inside;
+}
+
+int64_t day_9_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_9_1.txt");
+
+    std::vector<Vec2> vectors;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        Vec2 v;
+
+        size_t comma_pos = content.find(',');
+        v.x = std::stoll(content.substr(0, comma_pos));
+        content.erase(0, comma_pos + 1);
+        comma_pos = content.find(',');
+        v.y = std::stoll(content.substr(0, comma_pos));
+
+        vectors.push_back(v);
+    }
+    ifile.close();
+
+    int64_t area = 0;
+    int64_t max_area = 0;
+    for (size_t i = 0; i < vectors.size() - 1; i++)
+    {
+        for (size_t j = i + 1; j < vectors.size(); j++)
+        {
+            int64_t max_x = std::max(vectors[i].x, vectors[j].x);
+            int64_t max_y = std::max(vectors[i].y, vectors[j].y);
+            int64_t min_x = std::min(vectors[i].x, vectors[j].x);
+            int64_t min_y = std::min(vectors[i].y, vectors[j].y);
+
+            std::vector<Vec2> points_to_check;
+            points_to_check.push_back({ min_x + 1, min_y + 1 });
+            points_to_check.push_back({ min_x + 1, max_y - 1 });
+            points_to_check.push_back({ max_x - 1, min_y + 1 });
+            points_to_check.push_back({ max_x - 1, max_y - 1 });
+
+            std::vector<std::vector<Vec2>> lines_to_check;
+            lines_to_check.push_back({ points_to_check[0], points_to_check[1] });
+            lines_to_check.push_back({ points_to_check[1], points_to_check[3] });
+            lines_to_check.push_back({ points_to_check[3], points_to_check[2] });
+            lines_to_check.push_back({ points_to_check[2], points_to_check[0] });
+
+            bool all_inside = true;
+            area = (std::abs(vectors[i].x - vectors[j].x) + 1) * (std::abs(vectors[i].y - vectors[j].y) + 1);
+            if (area > max_area)
+            {
+                for (size_t pi = 0; pi < points_to_check.size(); pi++)
+                {
+                    bool inside = is_inside(points_to_check[pi], vectors);
+                    if (!inside)
+                    {
+                        all_inside = false;
+                        break;
+                    }
+                }
+                if (all_inside)
+                {
+                    for (size_t li = 0; li < lines_to_check.size(); li++)
+                    {
+                        size_t ii;
+                        for (ii = 1; ii < vectors.size(); ii++)
+                        {
+                            std::vector<Vec2> edge = { vectors[ii - 1], vectors[ii] };
+                            if (line_intersect(lines_to_check[li], edge))
+                            {
+                                all_inside = false;
+                                break;
+                            }
+                        }
+                        if (all_inside)
+                        {
+                            std::vector<Vec2> edge = { vectors[0], vectors[ii - 1] };
+                            if (line_intersect(lines_to_check[li], edge))
+                            {
+                                all_inside = false;
+                            }
+                        }
+
+                        if (!all_inside)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (all_inside)
+                {
+                    max_area = std::max(max_area, area);
+                }
+            }
+        }
+    }
+
+    return max_area;
+}
