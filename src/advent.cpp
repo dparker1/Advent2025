@@ -1076,3 +1076,114 @@ int64_t day_9_2()
 
     return max_area;
 }
+
+int64_t day_10_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_10_1.txt");
+
+    std::vector<int> buttons;
+    std::vector<std::vector<std::vector<int>>> switches;
+    std::vector<std::vector<int>> values;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        size_t bracket_pos = content.find(']');
+        std::string s_buttons = content.substr(1, bracket_pos-1);
+        int b = 0;
+        size_t i = 0;
+        for(char c : s_buttons)
+        {
+            if (c == '#')
+            {
+                b |= (1 << i);
+            }
+            i++;
+        }
+        buttons.push_back(b);
+
+        content.erase(0, bracket_pos + 2);
+
+        size_t paren_pos1 = content.find('(');
+        size_t paren_pos2 = content.find(')');
+        size_t comma_pos;
+        std::vector < std::vector<int>> curr_switches;
+        while (paren_pos1 != std::string::npos)
+        {
+            std::vector<int> s;
+            std::string s_switches = content.substr(paren_pos1 + 1, paren_pos2 - 1);
+            while ((comma_pos = s_switches.find(',')) != std::string::npos)
+            {
+                s.push_back(std::stoi(s_switches.substr(0, comma_pos)));
+                s_switches.erase(0, comma_pos + 1);
+            }
+            s.push_back(std::stoi(s_switches));
+            content.erase(0, paren_pos2 + 2);
+            paren_pos1 = content.find('(');
+            paren_pos2 = content.find(')');
+            curr_switches.push_back(s);
+        }
+        switches.push_back(curr_switches);
+
+        bracket_pos = content.find('{');
+        content.erase(0, bracket_pos + 1);
+        std::vector<int> v;
+        while ((comma_pos = content.find(',')) != std::string::npos)
+        {
+            v.push_back(std::stoi(content.substr(0, comma_pos)));
+            content.erase(0, comma_pos + 1);
+        }
+        bracket_pos = content.find('}');
+        v.push_back(std::stoi(content.substr(0, bracket_pos)));
+        values.push_back(v);
+    }
+    ifile.close();
+
+    int64_t sum = 0;
+    for (size_t i = 0; i < buttons.size(); i++)
+    {
+        std::unordered_map<int, int> dict;
+        std::queue<int> to_process;
+        int curr_button = 0;
+        int curr_button_val = 0;
+        int new_button = 0;
+        int curr_button_target = buttons[i];
+        dict[0] = 0;
+        to_process.push(0);
+        while (dict.find(curr_button_target) == dict.end())
+        {
+            size_t n = to_process.size();
+            for (size_t j = 0; j < n; j++)
+            {
+                curr_button = to_process.front();
+                to_process.pop();
+                curr_button_val = dict[curr_button];
+                for (size_t k = 0; k < switches[i].size(); k++)
+                {
+                    new_button = curr_button;
+                    for (size_t l = 0; l < switches[i][k].size(); l++)
+                    {
+                        new_button ^= (1 << switches[i][k][l]);
+                    }
+                    if (dict.find(new_button) != dict.end())
+                    {
+                        if (dict[new_button] > curr_button_val + 1)
+                        {
+                            dict[new_button] = curr_button_val + 1;
+                            to_process.push(new_button);
+                        }
+                    }
+                    else
+                    {
+                        dict[new_button] = curr_button_val + 1;
+                        to_process.push(new_button);
+                    }
+                }
+            }
+        }
+        sum += dict[curr_button_target];
+    }
+
+    return sum;
+}
