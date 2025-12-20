@@ -17,3 +17,4 @@ int64_t day_8_2();
 int64_t day_9_1();
 int64_t day_9_2();
 int64_t day_10_1();
+int64_t day_10_2();
