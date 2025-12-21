@@ -1284,5 +1284,58 @@ int64_t day_10_2()
         sum += (int64_t)glp_mip_obj_val(lp);
         glp_delete_prob(lp);
     }
+    glp_free_env();
     return sum;
+}
+
+int64_t day_11_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_11_1.txt");
+
+    std::unordered_map<std::string, std::vector<std::string>> edges;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        std::vector<std::string> curr_edges;
+
+        size_t colon_pos = content.find(':');
+        std::string source = content.substr(0, colon_pos);
+        content.erase(0, colon_pos + 1);
+
+        std::istringstream content_stream(content);
+        std::string tok;
+        while (content_stream >> tok)
+        {
+            curr_edges.push_back(tok);
+        }
+
+        edges[source] = curr_edges;
+    }
+    ifile.close();
+
+    std::queue<std::string> nodes_to_process;
+    nodes_to_process.push("you");
+
+    int64_t count = 0;
+    while (nodes_to_process.size() > 0)
+    {
+        std::string curr_node = nodes_to_process.front();
+        nodes_to_process.pop();
+        std::vector<std::string> curr_edges = edges[curr_node];
+        for (std::string ce : curr_edges)
+        {
+            if (ce == "out")
+            {
+                count++;
+            }
+            else
+            {
+                nodes_to_process.push(ce);
+            }
+        }
+    }
+
+    return count;
 }
