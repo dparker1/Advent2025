@@ -7,6 +7,7 @@
 #include <queue>
 #include <algorithm>
 #include <unordered_map>
+#include <map>
 
 #include <glpk.h>
 
@@ -1338,4 +1339,74 @@ int64_t day_11_1()
     }
 
     return count;
+}
+
+int64_t DFS(std::map<std::string, std::vector<std::string>>& edges, std::map<std::pair<int, std::string>, int64_t>& visited, std::string start, int flags)
+{
+    if (start == "dac")
+    {
+        flags |= (1 << 0);
+    }
+    if (start == "fft")
+    {
+        flags |= (1 << 1);
+    }
+    if (start == "out")
+    {
+        return (int)(flags == 3);
+    }
+
+    if (edges.find(start) == edges.end())
+    {
+        return 0;
+    }
+    std::vector<std::string> curr_edges = edges[start];
+
+    int64_t count = 0;
+    for (std::string ce : curr_edges)
+    {
+        std::pair<int, std::string> p = std::pair<int, std::string>(flags, ce);
+        if (visited.find(p) != visited.end())
+        {
+            count += visited[p];
+        }
+        else 
+        {
+            int64_t temp_count = DFS(edges, visited, ce, flags);
+            visited[p] = temp_count;
+            count += temp_count;
+        }
+    }
+    return count;
+}
+
+int64_t day_11_2()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_11_1.txt");
+
+    std::map<std::string, std::vector<std::string>> edges;
+
+    std::string content;
+    while (std::getline(ifile, content))
+    {
+        std::vector<std::string> curr_edges;
+
+        size_t colon_pos = content.find(':');
+        std::string source = content.substr(0, colon_pos);
+        content.erase(0, colon_pos + 1);
+
+        std::istringstream content_stream(content);
+        std::string tok;
+        while (content_stream >> tok)
+        {
+            curr_edges.push_back(tok);
+        }
+
+        edges[source] = curr_edges;
+    }
+    ifile.close();
+
+    std::map<std::pair<int, std::string>, int64_t> visited;
+    return DFS(edges, visited, "svr", 0);
 }
