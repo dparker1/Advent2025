@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <glpk.h>
+
 #include "advent.h"
 
 int64_t day_1_1()
@@ -1189,43 +1191,29 @@ int64_t day_10_2()
     std::ifstream ifile;
     ifile.open("./data/input_10_1.txt");
 
-    std::vector<int> buttons;
-    std::vector<std::vector<int>> switches;
+    std::vector<std::vector<std::vector<int>>> switches;
     std::vector<std::vector<int>> values;
 
     std::string content;
     while (std::getline(ifile, content))
     {
         size_t bracket_pos = content.find(']');
-        std::string s_buttons = content.substr(1, bracket_pos - 1);
-        int b = 0;
-        size_t i = 0;
-        for (char c : s_buttons)
-        {
-            if (c == '#')
-            {
-                b |= (1 << i);
-            }
-            i++;
-        }
-        buttons.push_back(b);
-
         content.erase(0, bracket_pos + 2);
 
         size_t paren_pos1 = content.find('(');
         size_t paren_pos2 = content.find(')');
         size_t comma_pos;
-        std::vector<int> curr_switches;
+        std::vector<std::vector<int>> curr_switches;
         while (paren_pos1 != std::string::npos)
         {
-            int s = 0;
+            std::vector<int> s;
             std::string s_switches = content.substr(paren_pos1 + 1, paren_pos2 - 1);
             while ((comma_pos = s_switches.find(',')) != std::string::npos)
             {
-                s |= 1 << std::stoi(s_switches.substr(0, comma_pos));
+                s.push_back(std::stoi(s_switches.substr(0, comma_pos)));
                 s_switches.erase(0, comma_pos + 1);
             }
-            s |= 1 << std::stoi(s_switches);
+            s.push_back(std::stoi(s_switches));
             content.erase(0, paren_pos2 + 2);
             paren_pos1 = content.find('(');
             paren_pos2 = content.find(')');
@@ -1248,45 +1236,53 @@ int64_t day_10_2()
     ifile.close();
 
     int64_t sum = 0;
-    for (size_t i = 0; i < buttons.size(); i++)
+
+    int ia[1 + 1000], ja[1 + 1000];
+    double a[1 + 1000];
+
+    glp_term_out(GLP_OFF);
+
+    for (size_t i = 0; i < values.size(); i++)
     {
-        std::unordered_map<int, int> dict;
-        std::queue<int> to_process;
-        int curr_button = 0;
-        int curr_button_val = 0;
-        int new_button = 0;
-        int curr_button_target = buttons[i];
-        dict[0] = 0;
-        to_process.push(0);
-        while (dict.find(curr_button_target) == dict.end())
+        std::fill(std::begin(a), std::end(a), 0);
+        int nrows = values[i].size();
+        int ncols = switches[i].size();
+
+        glp_prob* lp = glp_create_prob();
+
+        glp_set_obj_dir(lp, GLP_MIN);
+        glp_add_rows(lp, nrows);
+        for (size_t j = 1; j <= nrows; j++)
         {
-            size_t n = to_process.size();
-            for (size_t j = 0; j < n; j++)
+            glp_set_row_bnds(lp, j, GLP_FX, values[i][j - 1], values[i][j - 1]);
+            for (size_t k = 1; k <= ncols; k++)
             {
-                curr_button = to_process.front();
-                to_process.pop();
-                curr_button_val = dict[curr_button];
-                for (size_t k = 0; k < switches[i].size(); k++)
-                {
-                    new_button = curr_button ^ switches[i][k];
-                    if (dict.find(new_button) != dict.end())
-                    {
-                        if (dict[new_button] > curr_button_val + 1)
-                        {
-                            dict[new_button] = curr_button_val + 1;
-                            to_process.push(new_button);
-                        }
-                    }
-                    else
-                    {
-                        dict[new_button] = curr_button_val + 1;
-                        to_process.push(new_button);
-                    }
-                }
+                ia[(j - 1) * ncols + k] = j;
+                ja[(j - 1) * ncols + k] = k;
             }
         }
-        sum += dict[curr_button_target];
-    }
 
+        glp_add_cols(lp, ncols);
+        for (size_t k = 1; k <= ncols; k++)
+        {
+            glp_set_col_bnds(lp, k, GLP_LO, 0, 0);
+            glp_set_col_kind(lp, k, GLP_IV);
+            glp_set_obj_coef(lp, k, 1);
+            for (size_t l = 0; l < switches[i][k - 1].size(); l++)
+            {
+                a[switches[i][k - 1][l] * ncols + k] = 1;
+            }
+        }
+
+        glp_load_matrix(lp, nrows * ncols, ia, ja, a);
+
+        glp_iocp parm;
+        glp_init_iocp(&parm);
+        parm.presolve = GLP_ON;
+        int err = glp_intopt(lp, &parm);
+
+        sum += (int64_t)glp_mip_obj_val(lp);
+        glp_delete_prob(lp);
+    }
     return sum;
 }

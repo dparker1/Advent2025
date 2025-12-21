@@ -4,6 +4,6 @@
 
 int main()
 {
-    int64_t answer = day_10_1();
+    int64_t answer = day_10_2();
     std::cout << answer << std::endl;
 }
