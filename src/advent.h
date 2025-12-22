@@ -20,3 +20,4 @@ int64_t day_10_1();
 int64_t day_10_2();
 int64_t day_11_1();
 int64_t day_11_2();
+int64_t day_12_1();

@@ -1410,3 +1410,91 @@ int64_t day_11_2()
     std::map<std::pair<int, std::string>, int64_t> visited;
     return DFS(edges, visited, "svr", 0);
 }
+
+struct Shape 
+{
+    int count;
+    bool arr[3][3];
+};
+
+int64_t day_12_1()
+{
+    std::ifstream ifile;
+    ifile.open("./data/input_12_1.txt");
+
+    std::vector<Shape> shapes;
+    std::vector<std::pair<size_t, size_t>> bins;
+    std::vector<std::vector<size_t>> targets;
+
+    std::string content;
+    int shape_i = 0;
+    int shape_j = 0;
+    Shape s;
+    while (std::getline(ifile, content))
+    {
+        size_t colon_pos = content.find(':');
+        size_t x_pos = content.find('x');
+        if (x_pos != std::string::npos)
+        {
+            shape_i = -1;
+            int dim_x = std::stoi(content.substr(0, x_pos));
+            int dim_y = std::stoi(content.substr(x_pos + 1, colon_pos));
+            content.erase(0, colon_pos + 1);
+
+            bins.push_back(std::pair<size_t, size_t>(dim_x, dim_y));
+
+            std::vector<size_t> curr_target;
+
+            std::istringstream content_stream(content);
+            std::string tok;
+            while (content_stream >> tok)
+            {
+                curr_target.push_back(std::stoi(tok));
+            }
+            targets.push_back(curr_target);
+        }
+        if(shape_i > -1)
+        {
+            if (colon_pos != std::string::npos)
+            {
+                shape_i = std::stoi(content.substr(0, colon_pos));
+                s = { 0, {{false}, {false}, {false}} };
+                shape_j = 0;
+            }
+            else if (content.size() == 0)
+            {
+                shapes.push_back(s);
+            }
+            else
+            {
+                for (size_t i = 0; i < 3; i++)
+                {
+                    if (content[i] == '#')
+                    {
+                        s.count++;
+                        s.arr[shape_j][i] = true;
+                    }
+                }
+                shape_j++;
+            }
+        }
+    }
+    ifile.close();
+
+    size_t count = 0;
+    for (size_t i = 0; i < bins.size(); i++)
+    {
+        size_t area = bins[i].first * bins[i].second;
+        size_t shape_sum = 0;
+        for (size_t j = 0; j < targets[i].size(); j++)
+        {
+            shape_sum += targets[i][j] * shapes[j].count;
+        }
+        if (shape_sum <= area)
+        {
+            count++;
+        }
+    }
+
+    return count;
+}
